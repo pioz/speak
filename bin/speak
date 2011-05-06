@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+$APP_PATH = "#{File.dirname(__FILE__)}/.."
+
+require 'optparse'
+require 'cgi'
+
+options = {}
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: #{opts.program_name} [options] text_to_speech"
+  options[:locale] = 'en'
+  opts.on('-l', '--locale LOCALE', 'Set language to speech (default EN)' ) { |locale| options[:locale] = locale }
+  options[:out] = false
+  opts.on('-o', 'Print speech data as mp3 to STDOUT' ) { |out| options[:out] = true }
+  opts.on('-v', '--version', 'Display version') do
+    require "#{$APP_PATH}/lib/speak/version"
+    puts Speak::VERSION
+    exit
+  end
+  opts.on_tail('-h', '--help', 'Display this help' ) do
+    puts opts
+    exit
+  end
+end
+begin
+  optparse.parse!
+rescue OptionParser::InvalidOption
+  puts optparse.help
+  exit
+end
+if ARGV.size == 0
+  puts optparse.help
+  exit
+end
+
+# START
+
+text2speech = ARGV.join(' ')
+uri = "http://translate.google.com/translate_tts?tl=#{CGI.escape(options[:locale])}&q=#{CGI.escape(text2speech)}"
+
+if options[:out]
+  require 'open-uri'
+  open(uri) { |stream| $> << stream.read }
+else
+  require "#{$APP_PATH}/lib/speak"
+  Speak::play(uri)
+end
