@@ -25,6 +25,10 @@ Save the speech into a mp3 file
 
     $ speak Hello world -o > hello.mp3
 
+Read text to speech from STDIN
+
+    $ speak -i < text.txt
+
 == Questions or problems?
 
 If you have any issues with rplot please add an {issue on
